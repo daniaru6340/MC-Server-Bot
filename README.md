@@ -81,7 +81,7 @@ Contributions are what make the open-source community such an amazing place to l
 
     A special thanks to **[mcstatus.io](https://mcstatus.io/docs)** for providing a free and reliable API that powers this bot. Their service allows developers to easily retrieve real-time Minecraft server status without the need for complex server-side logic or protocol implementations. This project wouldn't be possible without their generous support.
 
-### contributors
+### Contributors
 
 ---
 
