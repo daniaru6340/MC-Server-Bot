@@ -5,6 +5,7 @@ const {
   REST,
   Routes,
   EmbedBuilder,
+  MessageFlags
 } = require("discord.js");
 const dotenv = require("dotenv");
 const { getinfo } = require("./submodules/mcstatus/mcstatus");
@@ -17,7 +18,11 @@ const TOKEN = process.env.TOKEN;
 const CLIENT_ID = process.env.CLIENT_ID;
 
 // client creation
-const client = new Client({ intents: [GatewayIntentBits.Guilds] });
+const client = new Client({ intents: [
+  GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.GuildMembers,
+] });
 
 // hello there rai
 
@@ -42,6 +47,10 @@ const commands = [
     name: "players",
     description: "List out all the players currently playing",
   },
+  {
+    name: "uuid",
+    description: "List UUID's of the players online"
+  }
 ];
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
@@ -67,18 +76,20 @@ client.on(Events.ClientReady, (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.isChatInputCommand()) return;
 
-  await interaction.deferReply();
-
+  
+// ping the bot
   if (interaction.commandName === "ping") {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
     await interaction.editReply("pong!");
   }
 
+
+// check status of mcserver
   if (interaction.commandName === "status") {
+    await interaction.deferReply();
     let icon = "https://generous-whale.static.domains/comingInHot.png";
     let mcInfo = await getinfo();
     let online = mcInfo.online;
-
-    console.log(online);
 
     if (online === true) {
       const onlineStatusEmbed = new EmbedBuilder()
@@ -111,7 +122,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 
+// get more detailed info about the server
   if (interaction.commandName === "info") {
+    await interaction.deferReply();
     let icon = "https://generous-whale.static.domains/comingInHot.png";
     let mcInfo = await getinfo();
     let online = mcInfo.online;
@@ -193,7 +206,10 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 
+
+  // list all the players currently on the server
   if (interaction.commandName === "players") {
+    await interaction.deferReply();
     let icon = "https://generous-whale.static.domains/comingInHot.png";
     let mcInfo = await getinfo();
     let online = mcInfo.online;
@@ -223,6 +239,72 @@ client.on(Events.InteractionCreate, async (interaction) => {
           await interaction.editReply({ embeds: [playerListEmbed] });
         }
       }
+    } else {
+      const noPlayersEmbed = new EmbedBuilder()
+        .setColor("#808080")
+        .setTitle("coming In Hot!")
+        .setDescription("Sorry No One is Playing at The Momment")
+        .setThumbnail(icon)
+        .setTimestamp()
+        .setFooter({ text: "MC-Server-Bot", iconURL: icon });
+    }
+  }
+
+
+// list uuid's of players currently playing on the server for users having a certain role
+  if (interaction.commandName === "uuid") {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+    let icon = "https://generous-whale.static.domains/comingInHot.png";
+    let mcInfo = await getinfo();
+    let online = mcInfo.online;
+
+    const UUIDRole = process.env.UUIDROLE;
+
+    if (interaction.member.roles.cache.some(role => role.name === UUIDRole)) {
+      if (online) {
+        let players = [];
+
+        for (let i = 0; i < mcInfo.players.list.length; i++) {
+          const player = mcInfo.players.list[i].name_raw;
+          players.push(
+            `${i + 1}.${player}: \`\`\`${mcInfo.players.list[i].uuid}\`\`\``
+          );
+
+          if (i + 1 == mcInfo.players.list.length) {
+            let playersList = players.join("\n");
+
+            const playerListEmbed = new EmbedBuilder()
+              .setColor("#0000FF")
+              .setTitle("Coming In Hot!")
+              .setDescription(`${mcInfo.motd.clean}`)
+              .setThumbnail(icon)
+              .addFields({
+                name: "Players",
+                value: playersList, inline: true,
+              })
+              .setTimestamp()
+              .setFooter({ text: "MC-Server-Bot", iconURL: icon });
+
+            await interaction.editReply({
+              embeds: [playerListEmbed],
+              flags: MessageFlags.Ephemeral,
+            });
+          }
+        }
+      } else {
+        const noPlayersEmbed = new EmbedBuilder()
+          .setColor("#808080")
+          .setTitle("coming In Hot!")
+          .setDescription("Sorry No One is Playing at The Momment")
+          .setThumbnail(icon)
+          .setTimestamp()
+          .setFooter({ text: "MC-Server-Bot", iconURL: icon });
+      }
+    } else {
+      await interaction.reply({
+        content: "U Do Not Have Access To This Command",
+        flags: MessageFlags.Ephemeral,
+      });
     }
   }
 });

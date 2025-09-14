@@ -19,6 +19,7 @@ Command Description
 `/status` Checks if the Minecraft server is currently online or offline.
 `/info` Provides detailed information about the server, including its software, address, and port.
 `/players` Lists the names of all players currently in the server.
+`/uuid` Lists user uuid for users only with a certain role
 
 ## Installation and Setup 🛠️
 
@@ -54,7 +55,16 @@ pnpm install
 ---
 
 #### 3. Create a .env file:
-Create a new file named `.env` in the root directory of the project. This file will store your bot's secret tocken, client ID and api url from [mcstatus.io](https://mcstatus.io/docs);
+Create a new file named `.env` in the root directory of the project. This file will store your bot's secret token, client ID and api url from [mcstatus.io](https://mcstatus.io/docs);
+
+env file format:
+
+```
+TOKEN=<Token here>
+CLIENT_ID=<Client ID>
+API=<MCSTATUS API URL>
+UUIDROLE=<ROLE TO USE UUID COMMAND>
+```
 
 ---
 
@@ -85,4 +95,8 @@ Contributions are what make the open-source community such an amazing place to l
 
 ---
 
-![Image](https://contrib.rocks/image?repo=daniaru6340/MC-Server-Bot)
+<a href="https://github.com/daniaru6340/MC-Server-Bot/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=daniaru6340/MC-Server-Bot" />
+</a>
+
+Made with [contrib.rocks](https://contrib.rocks).
