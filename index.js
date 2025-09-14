@@ -247,6 +247,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         .setThumbnail(icon)
         .setTimestamp()
         .setFooter({ text: "MC-Server-Bot", iconURL: icon });
+
+         await interaction.editReply({ embeds: [noPlayersEmbed] });
     }
   }
 
