@@ -3,9 +3,9 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-async function getinfo() {
+async function getinfo(api) {
     try {
-        const response = await axios.get(process.env.API);
+        const response = await axios.get(api);
         return response.data;
     } catch (err) {
         console.error(err);

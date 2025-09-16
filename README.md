@@ -10,16 +10,21 @@ MC-Server-Bot is a Discord bot designed to provide real-time status updates and 
 
 - Player List: View a list of all players currently connected to the server.
 
+- Player UUID list: View the UUID's of the players currently online.
+
 ## Commands 💻
 
 The bot uses Discord's slash commands for a seamless user experience.
 
-Command Description
-`/ping` Replies with pong! to check the bot's latency.
-`/status` Checks if the Minecraft server is currently online or offline.
-`/info` Provides detailed information about the server, including its software, address, and port.
-`/players` Lists the names of all players currently in the server.
-`/uuid` Lists user uuid for users only with a certain role
+**Command Description**
+---
+- `/ping` Replies with pong! to check the bot's latency.
+- `/status` Checks if the Minecraft server is currently online or offline.
+- `/info` Provides detailed information about the server, including its software, address, and port.
+- `/players` Lists the names of all players currently in the server.
+- `/uuid` Lists user uuid for users only with a certain role.
+- `/configure` allows you to configure the bot using the api keys setting the role aswell as an image that every embed comes with.
+
 
 ## Installation and Setup 🛠️
 
@@ -55,15 +60,13 @@ pnpm install
 ---
 
 #### 3. Create a .env file:
-Create a new file named `.env` in the root directory of the project. This file will store your bot's secret token, client ID and api url from [mcstatus.io](https://mcstatus.io/docs);
+Create a new file named `.env` in the root directory of the project. This file will store your bot's secret token, client ID.
 
 env file format:
 
 ```
 TOKEN=<Token here>
 CLIENT_ID=<Client ID>
-API=<MCSTATUS API URL>
-UUIDROLE=<ROLE TO USE UUID COMMAND>
 ```
 
 ---
