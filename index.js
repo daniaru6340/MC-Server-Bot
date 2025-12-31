@@ -105,13 +105,18 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 })();
 
 // bot actions
+  
 
 client.on(Events.ClientReady, (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}!`);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
-  const config = await loadConfig(interaction.guild.id);
+  if (!interaction.guild) {
+    return interaction.reply("This command can only be used in a server!");
+}
+
+  const config = await loadConfig(interaction.guild?.id);
   
 
   if (!interaction.isChatInputCommand()) return;
@@ -122,7 +127,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
       const role = interaction.options.getRole("role");
       const apiUrl = interaction.options.getString("api-url");
       const imageUrl = interaction.options.getString("image-url");
-      const guildId = interaction.guild.id;
+      const guildId = interaction.guild?.id;
       const configPath = path.join(__dirname, "configs", "guildConfig.json");
 
       try {
@@ -162,10 +167,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // check if config contains the guild
       if(config == null ) {
+        if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({ 
           flags: MessageFlags.Ephemeral,
           content: "Bot has yet not been configured. please configure the bot"
          })
+
+         } else {
+        await interaction.editReply({ 
+          flags: MessageFlags.Ephemeral,
+          content: "Bot has yet not been configured. please configure the bot"
+         })
+    }
 
          break;
       }
@@ -505,4 +518,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
   }
 });
+
+
+
 client.login(TOKEN);

@@ -29,7 +29,14 @@ The bot uses Discord's slash commands for a seamless user experience.
 ## Installation and Setup 🛠️
 
 To get a local copy of the project up and running, follow these simple steps.
----
+
+## Invite my bot
+
+  [![Add to Discord](https://img.shields.io/badge/Add_to_Discord-7289DA?style=for-the-badge&logo=discord&logoColor=white)](https://discord.com/oauth2/authorize?client_id=1266584910345539676)
+
+
+## Self Host
+
 > ### Prerequisites
     >   * Node.js: Make sure you have Node.js installed on your system.
     >   * pnpm: The pnpm package manager is required to install dependencies.
