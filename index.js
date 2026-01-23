@@ -107,7 +107,6 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
 })();
 
 // bot actions
-  
 
 client.on(Events.ClientReady, (readyClient) => {
   console.log(`Logged in as ${readyClient.user.tag}!`);
@@ -116,14 +115,7 @@ client.on(Events.ClientReady, (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.guild) {
     return interaction.reply("This command can only be used in a server!");
-<<<<<<< HEAD
-}
-
-  const config = await loadConfig(interaction.guild?.id);
-  
-=======
   }
->>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
 
   if (!interaction.isChatInputCommand()) return;
 
@@ -176,23 +168,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
       }
 
       // check if config contains the guild
-<<<<<<< HEAD
-      if(config == null ) {
-        if (!interaction.replied && !interaction.deferred) {
-        await interaction.reply({ 
-          flags: MessageFlags.Ephemeral,
-          content: "Bot has yet not been configured. please configure the bot"
-         })
-
-         } else {
-        await interaction.editReply({ 
-          flags: MessageFlags.Ephemeral,
-          content: "Bot has yet not been configured. please configure the bot"
-         })
-    }
-
-         break;
-=======
       if (config == null) {
         if (!interaction.replied && !interaction.deferred) {
           await interaction.editReply({
@@ -209,7 +184,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
         }
 
         break;
->>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
       }
 
       // get required data from config file
@@ -452,7 +426,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       //Lists all the commands the bot can handle
       if (interaction.commandName === "help") {
-
         if (
           interaction.member.roles.cache.some(
             (role) => role.id === requiredRole,
@@ -544,9 +517,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
 client.login(TOKEN);
