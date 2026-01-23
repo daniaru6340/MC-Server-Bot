@@ -39,10 +39,10 @@ To get a local copy of the project up and running, follow these simple steps.
 
 > ### Prerequisites
     >   * Node.js: Make sure you have Node.js installed on your system.
-    >   * pnpm: The pnpm package manager is required to install dependencies.
+    >   * bun/pnpm: The bun/pnpm package manager is required to install dependencies.
     
 > [!TIP]
-  > Use npm instead of pnpm if you have issues with pnpm
+  > Use npm instead of bun/pnpm if you have issues with bun/pnpm
 
 ---
 
