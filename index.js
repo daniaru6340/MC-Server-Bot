@@ -71,20 +71,22 @@ const commands = [
     .addRoleOption((option) =>
       option
         .setName("role")
-        .setDescription("The role in which you want to allow high level commands.")
-        .setRequired(true)
+        .setDescription(
+          "The role in which you want to allow high level commands.",
+        )
+        .setRequired(true),
     )
-    .addStringOption(option =>
+    .addStringOption((option) =>
       option
-      .setName("api-url")
-      .setDescription('The API url from mcstatus.io for mc server.')
-      .setRequired(true)
+        .setName("api-url")
+        .setDescription("The API url from mcstatus.io for mc server.")
+        .setRequired(true),
     )
-    .addStringOption(option => 
+    .addStringOption((option) =>
       option
-      .setName("image-url")
-      .setDescription("static icon image url of your server")
-      .setRequired(true)
+        .setName("image-url")
+        .setDescription("static icon image url of your server")
+        .setRequired(true),
     )
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setContexts(InteractionContextType.Guild),
@@ -114,16 +116,26 @@ client.on(Events.ClientReady, (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.guild) {
     return interaction.reply("This command can only be used in a server!");
+<<<<<<< HEAD
 }
 
   const config = await loadConfig(interaction.guild?.id);
   
+=======
+  }
+>>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
 
   if (!interaction.isChatInputCommand()) return;
 
+  const privateCommands = ["configure", "uuid", "ping", "help"];
+  const isPrivate = privateCommands.includes(interaction.commandName);
+
+  await interaction.deferReply({ flags: isPrivate ? MessageFlags.Ephemeral : 0 });
+
+  const config = await loadConfig(interaction.guild?.id);
+
   switch (interaction.commandName) {
     case "configure": {
-      await interaction.deferReply({ flags: MessageFlags.Ephemeral });
       const role = interaction.options.getRole("role");
       const apiUrl = interaction.options.getString("api-url");
       const imageUrl = interaction.options.getString("image-url");
@@ -145,12 +157,12 @@ client.on(Events.InteractionCreate, async (interaction) => {
         fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
 
         interaction.editReply(
-          `✅ Required role for the command has been successfully set to: **${role.name}**`
+          `✅ Required role for the command has been successfully set to: **${role.name}**`,
         );
       } catch (err) {
         console.error("Error updating the config file:", err);
         interaction.editReply(
-          `❌ There was an error while trying to save the configurations`
+          `❌ There was an error while trying to save the configurations`,
         );
       }
 
@@ -158,14 +170,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
     default: {
-
       // ping the bot
       if (interaction.commandName === "ping") {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
-        await interaction.editReply("pong!");
+        return await interaction.editReply("pong!");
       }
 
       // check if config contains the guild
+<<<<<<< HEAD
       if(config == null ) {
         if (!interaction.replied && !interaction.deferred) {
         await interaction.reply({ 
@@ -181,8 +192,25 @@ client.on(Events.InteractionCreate, async (interaction) => {
     }
 
          break;
-      }
+=======
+      if (config == null) {
+        if (!interaction.replied && !interaction.deferred) {
+          await interaction.editReply({
+            flags: MessageFlags.Ephemeral,
+            content:
+              "Bot has yet not been configured. please configure the bot",
+          });
+        } else {
+          await interaction.editReply({
+            flags: MessageFlags.Ephemeral,
+            content:
+              "Bot has yet not been configured. please configure the bot",
+          });
+        }
 
+        break;
+>>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
+      }
 
       // get required data from config file
 
@@ -190,11 +218,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
       let icon = config.imageUrl;
       let requiredRole = config.requiredRole;
 
-
-
       // check status of mcserver
       if (interaction.commandName === "status") {
-        await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -232,7 +257,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // get more detailed info about the server
       if (interaction.commandName === "info") {
-        await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -242,7 +266,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setColor("#00FF00")
             .setTitle("Coming In Hot!")
             .setDescription(
-              "Java users dont have to worry about writing a port"
+              "Java users dont have to worry about writing a port",
             )
             .setThumbnail(icon)
             .addFields(
@@ -270,7 +294,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 name: "Port",
                 value: `\`\`\`${mcInfo.port}\`\`\``,
                 inline: true,
-              }
+              },
             )
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
@@ -281,7 +305,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setColor("#FF0000")
             .setTitle("Coming In Hot!")
             .setDescription(
-              "Java users dont have to worry about writing a port"
+              "Java users dont have to worry about writing a port",
             )
             .setThumbnail(icon)
             .addFields(
@@ -309,7 +333,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 name: "Port",
                 value: `\`\`\`${mcInfo.port}\`\`\``,
                 inline: true,
-              }
+              },
             )
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
@@ -320,7 +344,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // list all the players currently on the server
       if (interaction.commandName === "players") {
-        await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -365,14 +388,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // list uuid's of players currently playing on the server for users having a certain role
       if (interaction.commandName === "uuid") {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
 
         if (
           interaction.member != null &&
-          interaction.member.roles.cache.some((role) => role.id === requiredRole)
+          interaction.member.roles.cache.some(
+            (role) => role.id === requiredRole,
+          )
         ) {
           if (online && mcInfo.players.list.length != 0) {
             let players = [];
@@ -380,7 +404,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             for (let i = 0; i < mcInfo.players.list.length; i++) {
               const player = mcInfo.players.list[i].name_raw;
               players.push(
-                `${i + 1}.${player}: \`\`\`${mcInfo.players.list[i].uuid}\`\`\``
+                `${i + 1}.${player}: \`\`\`${mcInfo.players.list[i].uuid}\`\`\``,
               );
 
               if (i + 1 == mcInfo.players.list.length) {
@@ -428,10 +452,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       //Lists all the commands the bot can handle
       if (interaction.commandName === "help") {
-        await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         if (
-          interaction.member.roles.cache.some((role) => role.id === requiredRole)
+          interaction.member.roles.cache.some(
+            (role) => role.id === requiredRole,
+          )
         ) {
           const helpEmbed = new EmbedBuilder()
             .setColor("Random")
@@ -466,7 +491,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
               {
                 name: "`/help`",
                 value: "Tells you about all the awsome things i can do",
-              }
+              },
             )
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
@@ -481,7 +506,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .addFields(
               {
                 name: "`/ping`",
-                value: "Allows admins to configure the bot."
+                value: "Allows admins to configure the bot.",
               },
               {
                 name: "`/ping`",
@@ -505,7 +530,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
               {
                 name: "`/help`",
                 value: "Tells you about all the awsome things i can do",
-              }
+              },
             )
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
@@ -519,6 +544,9 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
 client.login(TOKEN);
