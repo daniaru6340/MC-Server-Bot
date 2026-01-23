@@ -115,18 +115,7 @@ client.on(Events.ClientReady, (readyClient) => {
 client.on(Events.InteractionCreate, async (interaction) => {
   if (!interaction.guild) {
     return interaction.reply("This command can only be used in a server!");
-<<<<<<< HEAD
   }
-=======
-<<<<<<< HEAD
-}
-
-  const config = await loadConfig(interaction.guild?.id);
-  
-=======
-  }
->>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
->>>>>>> 0c641103c449d1a7d63ac60826067bdfd0a16536
 
   if (!interaction.isChatInputCommand()) return;
 
@@ -175,44 +164,11 @@ client.on(Events.InteractionCreate, async (interaction) => {
     default: {
       // ping the bot
       if (interaction.commandName === "ping") {
+        // await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         return await interaction.editReply("pong!");
       }
 
       // check if config contains the guild
-<<<<<<< HEAD
-      if (config == null) {
-=======
-<<<<<<< HEAD
-      if(config == null ) {
->>>>>>> 0c641103c449d1a7d63ac60826067bdfd0a16536
-        if (!interaction.replied && !interaction.deferred) {
-          await interaction.editReply({
-            flags: MessageFlags.Ephemeral,
-            content:
-              "Bot has yet not been configured. please configure the bot",
-          });
-        } else {
-          await interaction.editReply({
-            flags: MessageFlags.Ephemeral,
-            content:
-              "Bot has yet not been configured. please configure the bot",
-          });
-        }
-
-<<<<<<< HEAD
-        break;
-      }
-
-=======
-         } else {
-        await interaction.editReply({ 
-          flags: MessageFlags.Ephemeral,
-          content: "Bot has yet not been configured. please configure the bot"
-         })
-    }
-
-         break;
-=======
       if (config == null) {
         if (!interaction.replied && !interaction.deferred) {
           await interaction.editReply({
@@ -229,10 +185,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
         }
 
         break;
->>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
       }
 
->>>>>>> 0c641103c449d1a7d63ac60826067bdfd0a16536
       // get required data from config file
 
       let api = config.apiUrl;
@@ -241,6 +195,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // check status of mcserver
       if (interaction.commandName === "status") {
+        // await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -278,6 +233,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // get more detailed info about the server
       if (interaction.commandName === "info") {
+        // await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -365,6 +321,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // list all the players currently on the server
       if (interaction.commandName === "players") {
+        // await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -409,6 +366,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       // list uuid's of players currently playing on the server for users having a certain role
       if (interaction.commandName === "uuid") {
+        // await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -473,10 +431,8 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
       //Lists all the commands the bot can handle
       if (interaction.commandName === "help") {
-<<<<<<< HEAD
-=======
+        // await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
->>>>>>> 0c641103c449d1a7d63ac60826067bdfd0a16536
         if (
           interaction.member.roles.cache.some(
             (role) => role.id === requiredRole,
@@ -568,12 +524,4 @@ client.on(Events.InteractionCreate, async (interaction) => {
   }
 });
 
-<<<<<<< HEAD
-=======
-<<<<<<< HEAD
-
-
-=======
->>>>>>> 2125ae0 (bug fixes fix hanging issue for discord reply)
->>>>>>> 0c641103c449d1a7d63ac60826067bdfd0a16536
 client.login(TOKEN);
