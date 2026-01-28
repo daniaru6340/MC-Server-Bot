@@ -1,4 +1,4 @@
-const {
+import {
   Client,
   GatewayIntentBits,
   Events,
@@ -9,20 +9,40 @@ const {
   SlashCommandBuilder,
   PermissionFlagsBits,
   InteractionContextType,
-} = require("discord.js");
-const dotenv = require("dotenv");
-const fs = require("fs");
-const path = require("path");
-const { getinfo } = require("./submodules/mcstatus/mcstatus");
-const { loadConfig } = require("./submodules/configHandler/configHandler");
+  type Interaction,
+  type SlashCommandRoleOption,
+  type SlashCommandStringOption,
+} from "discord.js";
+import * as dotenv from "dotenv";
+import fs from "fs";
+import path from "path";
+import { getinfo } from "./submodules/mcstatus/mcstatus";
+import { loadConfig } from "./submodules/configHandler/configHandler";
+import {
+  getConfig,
+  addServerConfig,
+} from "./submodules/configHandlerDB/configHandlerDB";
 
 dotenv.config();
 
-// dotenv variables
+// BigInt support to turn string to BigInt since discord.js gives a string
+(BigInt.prototype as any).toJSON = function () {
+  return this.toString();
+};
 
-const TOKEN = process.env.TOKEN;
-const CLIENT_ID = process.env.CLIENT_ID;
-const botIcon = process.env.ICON;
+// Environment Config
+
+function getEnv(name: string): string {
+  const value = process.env[name];
+  if (!value) {
+    throw new Error(`ENV ${name} is missing!, check the .env file`);
+  }
+  return value;
+}
+
+const TOKEN = getEnv("TOKEN");
+const CLIENT_ID = getEnv("CLIENT_ID");
+const botIcon = getEnv("ICON");
 
 // client creation
 const client = new Client({
@@ -33,7 +53,8 @@ const client = new Client({
   ],
 });
 
-// command registration
+// command definitions
+
 const commands = [
   new SlashCommandBuilder()
     .setName("ping")
@@ -68,7 +89,7 @@ const commands = [
   new SlashCommandBuilder()
     .setName("configure")
     .setDescription("Setup the bot on the server.")
-    .addRoleOption((option) =>
+    .addRoleOption((option: SlashCommandRoleOption) =>
       option
         .setName("role")
         .setDescription(
@@ -76,13 +97,13 @@ const commands = [
         )
         .setRequired(true),
     )
-    .addStringOption((option) =>
+    .addStringOption((option: SlashCommandStringOption) =>
       option
         .setName("api-url")
         .setDescription("The API url from mcstatus.io for mc server.")
         .setRequired(true),
     )
-    .addStringOption((option) =>
+    .addStringOption((option: SlashCommandStringOption) =>
       option
         .setName("image-url")
         .setDescription("static icon image url of your server")
@@ -91,6 +112,8 @@ const commands = [
     .setDefaultMemberPermissions(PermissionFlagsBits.ManageRoles)
     .setContexts(InteractionContextType.Guild),
 ];
+
+// command registration
 
 const rest = new REST({ version: "10" }).setToken(TOKEN);
 
@@ -106,47 +129,63 @@ const rest = new REST({ version: "10" }).setToken(TOKEN);
   }
 })();
 
-// bot actions
+// handle interactions with bot
 
-client.on(Events.ClientReady, (readyClient) => {
+client.on(Events.ClientReady, (readyClient: Client<true>) => {
   console.log(`Logged in as ${readyClient.user.tag}!`);
 });
 
-client.on(Events.InteractionCreate, async (interaction) => {
+client.on(Events.InteractionCreate, async (interaction: Interaction) => {
+  if (!interaction.isChatInputCommand()) {
+    if (interaction.isAutocomplete()) {
+      return;
+    }
+    return;
+  }
+
   if (!interaction.guild) {
     return interaction.reply("This command can only be used in a server!");
   }
 
   if (!interaction.isChatInputCommand()) return;
 
-  const privateCommands = ["configure", "uuid", "ping", "help"];
-  const isPrivate = privateCommands.includes(interaction.commandName);
+// defer all interaction replies ephemerally by default
 
-  await interaction.deferReply({ flags: isPrivate ? MessageFlags.Ephemeral : 0 });
+  await interaction.deferReply({
+    flags: MessageFlags.Ephemeral,
+  });
 
-  const config = await loadConfig(interaction.guild?.id);
+  // get the server config from the db
+
+  const config = await getConfig(BigInt(interaction.guild?.id));
 
   switch (interaction.commandName) {
     case "configure": {
       const role = interaction.options.getRole("role");
+
+      if (!role) {
+        return interaction.editReply(`Could not find role:${role}`);
+      }
+
       const apiUrl = interaction.options.getString("api-url");
       const imageUrl = interaction.options.getString("image-url");
       const guildId = interaction.guild?.id;
-      const configPath = path.join(__dirname, "configs", "guildConfig.json");
+
+      if (!apiUrl) {
+        return interaction.editReply(
+          "Please enter an Api Url from mcstatus.io",
+        );
+      }
+
+      if (!imageUrl) {
+        return interaction.editReply(
+          "Please enter a Image Url for your server",
+        );
+      }
 
       try {
-        const configData = fs.readFileSync(configPath, "utf8");
-        let config = JSON.parse(configData);
-
-        if (!config[guildId]) {
-          config[guildId] = {};
-        }
-
-        config[guildId].requiredRole = role.id;
-        config[guildId].apiUrl = apiUrl;
-        config[guildId].imageUrl = imageUrl;
-
-        fs.writeFileSync(configPath, JSON.stringify(config, null, 2));
+        // add configuration to the database
+       await addServerConfig(BigInt(guildId), BigInt(role.id), apiUrl, imageUrl);
 
         interaction.editReply(
           `✅ Required role for the command has been successfully set to: **${role.name}**`,
@@ -164,21 +203,18 @@ client.on(Events.InteractionCreate, async (interaction) => {
     default: {
       // ping the bot
       if (interaction.commandName === "ping") {
-        // await interaction.deferReply({ flags: MessageFlags.Ephemeral });
         return await interaction.editReply("pong!");
       }
 
-      // check if config contains the guild
+      // check if bot is configured in the discord server
       if (config == null) {
         if (!interaction.replied && !interaction.deferred) {
           await interaction.editReply({
-            flags: MessageFlags.Ephemeral,
             content:
               "Bot has yet not been configured. please configure the bot",
           });
         } else {
           await interaction.editReply({
-            flags: MessageFlags.Ephemeral,
             content:
               "Bot has yet not been configured. please configure the bot",
           });
@@ -187,23 +223,19 @@ client.on(Events.InteractionCreate, async (interaction) => {
         break;
       }
 
-      // get required data from config file
-
-      let api = config.apiUrl;
-      let icon = config.imageUrl;
-      let requiredRole = config.requiredRole;
+      let api = config.api_url;
+      let icon = config.image_url;
+      let requiredRole = config.required_role;
 
       // check status of mcserver
       if (interaction.commandName === "status") {
-        // await interaction.deferReply();
-
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
 
         if (online === true) {
           const onlineStatusEmbed = new EmbedBuilder()
             .setColor("#00FF00")
-            .setTitle("Coming In Hot!")
+            .setTitle(`${mcInfo.host}`)
             .setDescription(`${mcInfo.motd.clean}`)
             .setThumbnail(icon)
             .addFields({
@@ -213,11 +245,14 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
 
-          await interaction.editReply({ embeds: [onlineStatusEmbed] });
+          if (interaction.channel?.isSendable()) {
+            await interaction.deleteReply();
+            await interaction.channel.send({ embeds: [onlineStatusEmbed] });
+          }
         } else if (online === false) {
           const offlineStatusEmbed = new EmbedBuilder()
             .setColor("#FF0000")
-            .setTitle("Coming In Hot!")
+            .setTitle(`${mcInfo.host}`)
             .setDescription("Sorry For The Inconvinience")
             .setThumbnail(icon)
             .addFields({
@@ -227,23 +262,24 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
 
-          await interaction.editReply({ embeds: [offlineStatusEmbed] });
+          if (interaction.channel?.isSendable()) {
+            await interaction.deleteReply();
+            await interaction.channel.send({ embeds: [offlineStatusEmbed] });
+          }
         }
       }
 
       // get more detailed info about the server
       if (interaction.commandName === "info") {
-        // await interaction.deferReply();
-
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
 
         if (online) {
           const infoEmbed = new EmbedBuilder()
             .setColor("#00FF00")
-            .setTitle("Coming In Hot!")
+            .setTitle(`${mcInfo.motd.clean}`)
             .setDescription(
-              "Java users dont have to worry about writing a port",
+              "Go enjoy the server guys",
             )
             .setThumbnail(icon)
             .addFields(
@@ -276,13 +312,16 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
 
-          await interaction.editReply({ embeds: [infoEmbed] });
+          if (interaction.channel?.isSendable()) {
+            await interaction.deleteReply();
+            await interaction.channel.send({ embeds: [infoEmbed] });
+          }
         } else {
           const offlineEmbed = new EmbedBuilder()
             .setColor("#FF0000")
-            .setTitle("Coming In Hot!")
+            .setTitle("MC-Server-Bot :(")
             .setDescription(
-              "Java users dont have to worry about writing a port",
+              `I apologize for the inconvenience caused. <@&${config.required_role}> please look into this`,
             )
             .setThumbnail(icon)
             .addFields(
@@ -315,13 +354,15 @@ client.on(Events.InteractionCreate, async (interaction) => {
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
 
-          await interaction.editReply({ embeds: [offlineEmbed] });
+          if (interaction.channel?.isSendable()) {
+            await interaction.deleteReply();
+            await interaction.channel.send({ embeds: [offlineEmbed] });
+          }
         }
       }
 
       // list all the players currently on the server
       if (interaction.commandName === "players") {
-        // await interaction.deferReply();
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
@@ -338,7 +379,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
               const playerListEmbed = new EmbedBuilder()
                 .setColor("#0000FF")
-                .setTitle("Coming In Hot!")
+                .setTitle(`${mcInfo.host}`)
                 .setDescription(`${mcInfo.motd.clean}`)
                 .setThumbnail(icon)
                 .addFields({
@@ -348,33 +389,45 @@ client.on(Events.InteractionCreate, async (interaction) => {
                 .setTimestamp()
                 .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
 
-              await interaction.editReply({ embeds: [playerListEmbed] });
+              if (interaction.channel?.isSendable()) {
+                await interaction.deleteReply();
+                await interaction.channel.send({ embeds: [playerListEmbed] });
+              }
             }
           }
         } else {
           const noPlayersEmbed = new EmbedBuilder()
             .setColor("#808080")
-            .setTitle("Coming In Hot!")
+            .setTitle(`${mcInfo.host}`)
             .setDescription("Sorry No One is Playing at The Momment")
             .setThumbnail(icon)
             .setTimestamp()
             .setFooter({ text: "MC-Server-Bot", iconURL: botIcon });
 
-          await interaction.editReply({ embeds: [noPlayersEmbed] });
+          if (interaction.channel?.isSendable()) {
+            await interaction.deleteReply();
+            await interaction.channel.send({ embeds: [noPlayersEmbed] });
+          }
         }
       }
 
-      // list uuid's of players currently playing on the server for users having a certain role
+      // list uuid's of players currently playing on the server and restricted to users having a certain role
       if (interaction.commandName === "uuid") {
-        // await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
 
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
 
+        if (!interaction.inCachedGuild()) {
+          return interaction.editReply(
+            "This command can only be used in a server",
+          );
+        }
+
         if (
           interaction.member != null &&
           interaction.member.roles.cache.some(
-            (role) => role.id === requiredRole,
+            (role) => BigInt(role.id) === requiredRole,
           )
         ) {
           if (online && mcInfo.players.list.length != 0) {
@@ -391,7 +444,7 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
                 const playerListEmbed = new EmbedBuilder()
                   .setColor("#0000FF")
-                  .setTitle("Coming In Hot!")
+                  .setTitle(`${mcInfo.host}`)
                   .setDescription(`${mcInfo.motd.clean}`)
                   .setThumbnail(icon)
                   .addFields({
@@ -404,14 +457,13 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
                 await interaction.editReply({
                   embeds: [playerListEmbed],
-                  flags: MessageFlags.Ephemeral,
                 });
               }
             }
           } else {
             const noPlayersEmbed = new EmbedBuilder()
               .setColor("#808080")
-              .setTitle("Coming In Hot!")
+              .setTitle(`${mcInfo.host}`)
               .setDescription("Sorry No One is Playing at The Momment")
               .setThumbnail(icon)
               .setTimestamp()
@@ -424,18 +476,21 @@ client.on(Events.InteractionCreate, async (interaction) => {
         } else {
           await interaction.editReply({
             content: `U Do Not Have Access To This Command`,
-            flags: MessageFlags.Ephemeral,
           });
         }
       }
 
-      //Lists all the commands the bot can handle
+      // Lists all the commands the bot can handle plus gives personalized response based on if the user has a specific role
       if (interaction.commandName === "help") {
-        // await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+        if (!interaction.inCachedGuild()) {
+          return interaction.editReply(
+            "This command can only be used in a server",
+          );
+        }
 
         if (
           interaction.member.roles.cache.some(
-            (role) => role.id === requiredRole,
+            (role) => BigInt(role.id) === requiredRole,
           )
         ) {
           const helpEmbed = new EmbedBuilder()

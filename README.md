@@ -28,7 +28,6 @@ The bot uses Discord's slash commands for a seamless user experience.
 
 ## Installation and Setup 🛠️
 
-To get a local copy of the project up and running, follow these simple steps.
 
 ## Invite my bot
 
@@ -37,9 +36,12 @@ To get a local copy of the project up and running, follow these simple steps.
 
 ## Self Host
 
+To get a local copy of the project up and running, follow these simple steps.
+
 > ### Prerequisites
-    >   * Node.js: Make sure you have Node.js installed on your system.
-    >   * bun/pnpm: The bun/pnpm package manager is required to install dependencies.
+  >   * Node.js: Make sure you have Node.js installed on your system.
+  >   * bun/pnpm: The bun/pnpm package manager is required to install dependencies.
+  >   * database server is required since the json config is no longer present or you can use a sqlite database see prisma docs on how to specify which db in here i have used a postgres db
     
 > [!TIP]
   > Use npm instead of bun/pnpm if you have issues with bun/pnpm
@@ -61,7 +63,7 @@ cd MC-Server-Bot
 
 #### 2. Install the required dependencies:
 ```
-pnpm install
+bun install
 ```
 
 ---
@@ -74,13 +76,19 @@ env file format:
 ```
 TOKEN=<Token here>
 CLIENT_ID=<Client ID>
+DATABASE_URL=<DB URL>
+SHADOW_DATABASE_URL=<Shadow DB URL>
 ```
+
+>[!INFO]DB/Shadow DB url format
+  > ```postgress://dbuser:dbpassword@host:port/dbname?schema=public```
+  > for more info check **[Prisma docs](https://pris.ly/d/connection-strings)**
 
 ---
 
 #### 4. Run the bot:
 ```
-pnpm start
+bun start
 ```
 
 ---

@@ -1,9 +1,9 @@
-const axios = require('axios');
-const dotenv = require('dotenv');
+import axios from 'axios';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
-async function getinfo(api) {
+async function getinfo(api:string) {
     try {
         const response = await axios.get(api);
         return response.data;
@@ -13,4 +13,4 @@ async function getinfo(api) {
 }
 
 
-module.exports = { getinfo };
+export { getinfo };
