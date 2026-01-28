@@ -87,9 +87,9 @@ SHADOW_DATABASE_URL=<Shadow DB URL>
 
 ---
 
-#### 4. Build and Run the bot:
+#### 4. Initialize and Run the bot:
 ```
-bun build && bun start
+bun initialize && bun start
 ```
 
 ---
