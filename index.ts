@@ -14,8 +14,6 @@ import {
   type SlashCommandStringOption,
 } from "discord.js";
 import * as dotenv from "dotenv";
-import fs from "fs";
-import path from "path";
 import { getinfo } from "./submodules/mcstatus/mcstatus";
 import {
   getConfig,

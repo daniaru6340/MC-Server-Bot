@@ -94,6 +94,31 @@ bun initialize && bun start
 
 ---
 
+## Use Docker
+>[!IMPORTANT]
+>Ensure you have docker installed on your device
+
+### Compose file
+
+You could either
+* clone the repo
+* or just download the docker-compose.yml alone
+
+and now if you want to clone the repo do the following
+```
+git clone https://github.com/daniaru6340/MC-Server-Bot.git
+cd MC-Server-Bot
+```
+and create a .env file and fill all the information required as shown [here](https://github.com/daniaru6340/MC-Server-Bot/?tab=readme-ov-file#3-create-a-env-file)
+
+and next run the following command (this is the same command those who downloaded the compose file should run)
+>[!IMPORTANT]
+>be sure to change the default username and password in the composefile
+```
+docker compose up -d
+```
+
+
 ## Contributing 🤝
 
 Contributions are what make the open-source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.

@@ -1,0 +1,43 @@
+services:
+  bot:
+    build: .
+    image: mc-server-bot:latest
+    container_name: mc-server-bot
+    restart: always
+    volumes:
+     - ./.env:/app/.env
+    depends_on:
+      - db
+    networks:
+      - mc-server-bot-network
+  
+  db:
+    image: postgres
+    restart: always
+    shm_size: 128mb
+
+    environment:
+      POSTGRES_USER: mc_server_bot_user
+      POSTGRES_PASSWORD: mc_server_bot_pass
+      POSTGRES_DB: mc_server_db
+    volumes:
+      - ./runtime/pgdata:/var/lib/postgresql
+    networks:
+      - mc-server-bot-network
+
+
+  #   optional but good for managing db by visualising
+  
+  # adminer:
+  #   image: adminer
+  #   restart: always
+  #   ports:
+  #     - 8080:8080
+  #   volumes:
+  #     - ./runtime/adminerWebContent:/var/www/html
+  #   networks:
+  #     - mc-server-bot-network
+
+networks:
+  mc-server-bot-network:
+    driver: bridge
