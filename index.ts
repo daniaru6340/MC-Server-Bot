@@ -17,7 +17,6 @@ import * as dotenv from "dotenv";
 import fs from "fs";
 import path from "path";
 import { getinfo } from "./submodules/mcstatus/mcstatus";
-import { loadConfig } from "./submodules/configHandler/configHandler";
 import {
   getConfig,
   addServerConfig,
