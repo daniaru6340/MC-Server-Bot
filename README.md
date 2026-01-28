@@ -80,7 +80,8 @@ DATABASE_URL=<DB URL>
 SHADOW_DATABASE_URL=<Shadow DB URL>
 ```
 
->[!IMPORTANT]DB/Shadow DB url format
+>[!IMPORTANT]
+>DB/Shadow DB url format
   > ```postgress://dbuser:dbpassword@host:port/dbname?schema=public```
   > for more info check **[Prisma docs](https://pris.ly/d/connection-strings)**
 
