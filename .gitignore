@@ -92,6 +92,7 @@ build/
 # Builds
 /dist
 
+
 # test files
 
-test.ts
+/test.ts

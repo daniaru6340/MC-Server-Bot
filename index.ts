@@ -186,7 +186,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
         /^https:\/\/api\.mcstatus\.io\/v2\/status\/java\/(.+)$/;
 
       if (!apiUrlRegex.test(apiUrl)) {
-        interaction.editReply(
+        await interaction.editReply(
           `Your api url seems to be not the one i expected. It should be in the following format \`\`\`https://api.mcstatus.io/v2/status/java/< Server IP/Address >\`\`\` Please try again after replacing the "<server IP/Address>" with your actual server address`,
         );
         return;
