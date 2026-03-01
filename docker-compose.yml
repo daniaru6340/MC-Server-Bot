@@ -1,7 +1,7 @@
 services:
   bot:
     build: .
-    image: mc-server-bot:latest
+    image: d4n14ru/mc-server-bot:latest
     container_name: mc-server-bot
     restart: always
     volumes:

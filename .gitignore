@@ -88,3 +88,10 @@ build/
 /configs
 /runtime
 /pgdata
+
+# Builds
+/dist
+
+# test files
+
+test.ts

@@ -146,7 +146,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
   if (!interaction.isChatInputCommand()) return;
 
-// defer all interaction replies ephemerally by default
+  // defer all interaction replies ephemerally by default
 
   await interaction.deferReply({
     flags: MessageFlags.Ephemeral,
@@ -180,12 +180,29 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
         );
       }
 
+      // error handle non supported urls
+      // define regex structure for apiUrl
+      const apiUrlRegex: RegExp =
+        /^https:\/\/api\.mcstatus\.io\/v2\/status\/java\/(.+)$/;
+
+      if (!apiUrlRegex.test(apiUrl)) {
+        interaction.editReply(
+          `Your api url seems to be not the one i expected. It should be in the following format \`\`\`https://api.mcstatus.io/v2/status/java/< Server IP/Address >\`\`\` Please try again after replacing the "<server IP/Address>" with your actual server address`,
+        );
+        return;
+      }
+
       try {
         // add configuration to the database
-       await addServerConfig(BigInt(guildId), BigInt(role.id), apiUrl, imageUrl);
+        await addServerConfig(
+          BigInt(guildId),
+          BigInt(role.id),
+          apiUrl,
+          imageUrl,
+        );
 
         interaction.editReply(
-          `✅ Required role for the command has been successfully set to: **${role.name}**`,
+          `✅ Required role for the command has been successfully set to: **${role.name}** and configuration has been saved`,
         );
       } catch (err) {
         console.error("Error updating the config file:", err);
@@ -275,9 +292,7 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
           const infoEmbed = new EmbedBuilder()
             .setColor("#00FF00")
             .setTitle(`${mcInfo.motd.clean}`)
-            .setDescription(
-              "Go enjoy the server guys",
-            )
+            .setDescription("Go enjoy the server guys")
             .setThumbnail(icon)
             .addFields(
               {
@@ -360,7 +375,6 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
       // list all the players currently on the server
       if (interaction.commandName === "players") {
-
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
 
@@ -410,8 +424,6 @@ client.on(Events.InteractionCreate, async (interaction: Interaction) => {
 
       // list uuid's of players currently playing on the server and restricted to users having a certain role
       if (interaction.commandName === "uuid") {
-
-
         let mcInfo = await getinfo(api);
         let online = mcInfo.online;
 

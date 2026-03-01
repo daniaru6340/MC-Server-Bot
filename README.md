@@ -18,6 +18,7 @@ The bot uses Discord's slash commands for a seamless user experience.
 
 **Command Description**
 ---
+- `/help` I can tell You all about what i can do.
 - `/ping` Replies with pong! to check the bot's latency.
 - `/status` Checks if the Minecraft server is currently online or offline.
 - `/info` Provides detailed information about the server, including its software, address, and port.
@@ -46,6 +47,8 @@ To get a local copy of the project up and running, follow these simple steps.
 > [!TIP]
   > Use npm instead of bun/pnpm if you have issues with bun/pnpm
 
+> [!TIP]
+  > OR Just use docker compose file and dont worry about any of the above
 ---
 
 ### Steps
